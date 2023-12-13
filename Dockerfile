@@ -1,20 +1,24 @@
-FROM ruby:2.6.4-alpine3.10
+# Use an Alpine-based Ruby image
+FROM ruby:2.7.2-alpine
 
-RUN apk --update add nodejs netcat-openbsd postgresql-dev
-RUN apk --update add --virtual build-dependencies make g++
+# Install necessary packages
+RUN apk --update add nodejs netcat-openbsd postgresql-dev build-base
 
-RUN mkdir /myapp
-
+# Set the working directory
 WORKDIR /myapp
 
-ADD Gemfile /myapp/Gemfile
-ADD Gemfile.lock /myapp/Gemfile.lock
+# Copy Gemfile and Gemfile.lock
+COPY Gemfile Gemfile.lock ./
 
+# Install dependencies
 RUN bundle install
-RUN apk del build-dependencies && rm -rf /var/cache/apk/*
 
-ADD . /myapp
+# Copy the rest of the application code
+COPY . .
 
+# Copy the entrypoint script
 COPY docker-entrypoint.sh /usr/local/bin
 
+# Set the entrypoint
 ENTRYPOINT ["docker-entrypoint.sh"]
+
